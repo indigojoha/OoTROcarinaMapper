@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="styles.css" />
+		<script src="script.js" defer></script>
+		<title>OoT Ocarina Mapper</title>
+	</head>
+	<body>
+		<main class="app">
+			<section class="staff" aria-label="Interactive music staff">
+				<header class="page-heading">
+					<h1>OoT Ocarina Note Mapper</h1>
+					<p>Convert music into controller inputs for Ocarina of Time on Nintendo Switch 2.</p>
+					<p>Draw notes on the staff, and the controller inputs will automatically appear underneath.</p>
+					<p class="modifier-instructions">Modifiers: use the Left Stick for ±1 and ±2, or the D-Pad for ±1 only.</p>
+				</header>
+				<div class="clipboard-controls">
+					<button type="button" id="copy-button" class="clipboard-button">Copy</button>
+					<button type="button" id="paste-button" class="clipboard-button">Paste</button>
+				</div>
+				<p id="clipboard-status" class="clipboard-status" role="status" aria-live="polite"></p>
+				<div class="staff-controls">
+					<div class="notation-toggle" id="notation-toggle" role="group" aria-label="Pitch notation">
+						<button type="button" class="notation-option" data-notation="solfege" aria-pressed="false">Solfège</button>
+						<button type="button" class="notation-option active" data-notation="alphabet" aria-pressed="true">Alphabet</button>
+					</div>
+					<button type="button" id="clear-button" class="clear-button">Clear</button>
+				</div>
+
+				<div class="staff-scroll">
+					<div class="staff-layout">
+						<div class="pitch-labels" id="pitch-labels"></div>
+						<div class="staff-content">
+							<div class="staff-grid" id="staff-grid" role="group" aria-label="16-column chromatic note staff"></div>
+							<div class="column-labels" id="column-labels"></div>
+							<div class="button-staff" id="button-staff" role="img" aria-live="polite" aria-label="Button output staff. Empty."></div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
