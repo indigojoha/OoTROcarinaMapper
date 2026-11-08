@@ -46,7 +46,7 @@ const staffLines = new Set([76, 79, 83, 86]);
 const sharpNotes = new Set([1, 3, 6, 8, 10]);
 const labelsByMidi = new Map();
 const cellsByMidi = new Map();
-const faceButtons = new Set(["A", "Y", "X"]);
+const halfGridShiftButtons = new Set(["L", "R", "A"]);
 let clipboardStatusTimer;
 let clipboardFadeTimer;
 const outputButtonRows = new Map([
@@ -72,49 +72,16 @@ function printSequence() {
 	console.log(selectedNotes.filter((note) => note !== null));
 }
 
-function preferredButtonRank(button, previousButton) {
-	if (previousButton === "R") {
-		return faceButtons.has(button) ? 0 : 1;
-	}
-	if (faceButtons.has(previousButton)) {
-		return button === "R" ? 0 : 1;
-	}
-	if (previousButton === "L") {
-		return button === "L" ? 1 : 0;
-	}
-	return 0;
-}
-
-function findButtonForNote(midi, previousButton) {
-	let bestCandidate = null;
-	let bestRank = Infinity;
-	let bestComplexity = Infinity;
-
-	for (const candidate of buttonCandidates) {
-		if (candidate.midi !== midi) {
-			continue;
-		}
-
-		const preferenceRank = preferredButtonRank(candidate.button, previousButton);
-		if (
-			preferenceRank < bestRank ||
-			(preferenceRank === bestRank && candidate.complexity < bestComplexity)
-		) {
-			bestCandidate = candidate;
-			bestRank = preferenceRank;
-			bestComplexity = candidate.complexity;
-		}
-	}
-
-	if (!bestCandidate) {
+function findButtonsForNote(midi) {
+	const candidates = buttonCandidates.filter((candidate) => candidate.midi === midi);
+	if (candidates.length === 0) {
 		throw new Error(`No button mapping exists for MIDI note ${midi}`);
 	}
-	return bestCandidate;
+	return candidates;
 }
 
 function renderButtonStaff() {
 	buttonStaff.replaceChildren();
-	let previousButton = null;
 	const sequence = [];
 
 	for (const [column, midi] of selectedNotes.entries()) {
@@ -122,25 +89,34 @@ function renderButtonStaff() {
 			continue;
 		}
 
-		const candidate = findButtonForNote(midi, previousButton);
-		previousButton = candidate.button;
-		sequence.push(`${candidate.button}${candidate.modifier}`);
+		const candidates = findButtonsForNote(midi);
+		sequence.push(candidates.map((candidate) => `${candidate.button}${candidate.modifier}`).join(" or "));
 
-		const buttonMarker = document.createElement("span");
-		buttonMarker.className = "button-staff-marker";
-		buttonMarker.textContent = candidate.button;
-		buttonMarker.style.gridColumn = String(column + 1);
-		buttonMarker.style.gridRow = String(outputButtonRows.get(candidate.button));
+		for (const candidate of candidates) {
+			const buttonMarker = document.createElement("span");
+			buttonMarker.className = "button-staff-marker";
+			if (halfGridShiftButtons.has(candidate.button)) {
+				buttonMarker.classList.add("button-staff-marker-shifted");
+			}
+			buttonMarker.textContent = candidate.button;
+			buttonMarker.style.gridColumn = String(column + 1);
+			buttonMarker.style.gridRow = String(outputButtonRows.get(candidate.button));
 
-		if (candidate.modifier) {
-			const modifier = document.createElement("span");
-			modifier.className = "button-staff-modifier";
-			modifier.textContent = candidate.modifier;
-			modifier.classList.add(candidate.modifier.startsWith("+") ? "modifier-above" : "modifier-below");
-			buttonMarker.append(modifier);
+			if (candidate.modifier) {
+				const modifier = document.createElement("span");
+				modifier.className = "button-staff-modifier modifier-below";
+				modifier.classList.add({
+					"+1": "modifier-plus-one",
+					"+2": "modifier-plus-two",
+					"-1": "modifier-minus-one",
+					"-2": "modifier-minus-two",
+				}[candidate.modifier]);
+				modifier.textContent = candidate.modifier;
+				buttonMarker.append(modifier);
+			}
+
+			buttonStaff.append(buttonMarker);
 		}
-
-		buttonStaff.append(buttonMarker);
 	}
 
 	buttonStaff.setAttribute(

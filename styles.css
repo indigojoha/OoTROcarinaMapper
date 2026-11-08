@@ -323,21 +323,45 @@ body {
 	font-weight: 700;
 }
 
+.button-staff-marker-shifted {
+	transform: translateY(calc(var(--staff-step) / -2));
+}
+
 .button-staff-modifier {
 	position: absolute;
-	left: 50%;
+	right: 0;
 	color: #514a39;
 	font-size: 0.64rem;
 	line-height: 1;
-	transform: translateX(-50%);
+	text-shadow:
+		-1px -1px 0 var(--modifier-outline),
+		0 -1px 0 var(--modifier-outline),
+		1px -1px 0 var(--modifier-outline),
+		-1px 0 0 var(--modifier-outline),
+		1px 0 0 var(--modifier-outline),
+		-1px 1px 0 var(--modifier-outline),
+		0 1px 0 var(--modifier-outline),
+		1px 1px 0 var(--modifier-outline);
 }
 
-.button-staff-modifier.modifier-above {
-	bottom: calc(100% + 1px);
+.button-staff-modifier.modifier-plus-one {
+	--modifier-outline: #c5e8c5;
+}
+
+.button-staff-modifier.modifier-plus-two {
+	--modifier-outline: #00ff00;
+}
+
+.button-staff-modifier.modifier-minus-one {
+	--modifier-outline: #e8c5c5;
+}
+
+.button-staff-modifier.modifier-minus-two {
+	--modifier-outline: #ff4040;
 }
 
 .button-staff-modifier.modifier-below {
-	top: calc(100% + 1px);
+	bottom: -3px;
 }
 
 .sequence-actions {
