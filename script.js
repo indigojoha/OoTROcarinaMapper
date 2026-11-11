@@ -12,11 +12,11 @@ const buttonNotes = Object.fromEntries(
 
 const pitchNames = [
 	"Do5", "Do#5", "Re5", "Re#5", "Mi5", "Fa5", "Fa#5", "Sol5",
-	"Sol#5", "La5", "La#5", "Si5", "Do6", "Do#6", "Re6", "Re#6",
+	"Sol#5", "La5", "La#5", "Si5", "Do6", "Do#6", "Re6", "Re#6", "Mi6",
 ];
 const alphabetPitchNames = [
 	"C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5",
-	"G#5", "A5", "A#5", "B5", "C6", "C#6", "D6", "D#6",
+	"G#5", "A5", "A#5", "B5", "C6", "C#6", "D6", "D#6", "E6",
 ];
 const pitches = pitchNames.map((name, index) => ({
 	name,
@@ -25,7 +25,7 @@ const pitches = pitchNames.map((name, index) => ({
 }));
 
 const columnCount = 16;
-const highestMidi = 87;
+const highestMidi = 88;
 const defaultNotation = "alphabet";
 const selectedNotes = Array(columnCount).fill(null);
 const staffGrid = document.querySelector("#staff-grid");
@@ -33,14 +33,15 @@ const pitchLabels = document.querySelector("#pitch-labels");
 const columnLabels = document.querySelector("#column-labels");
 const buttonStaff = document.querySelector("#button-staff");
 const notationToggle = document.querySelector(".notation-toggle");
+const alternativesToggle = document.querySelector("#alternatives-toggle");
 const clearButton = document.querySelector("#clear-button");
 const copyButton = document.querySelector("#copy-button");
 const pasteButton = document.querySelector("#paste-button");
 const clipboardStatus = document.querySelector("#clipboard-status");
 const staffRows = new Map([
-	[72, 18], [73, 17], [74, 16], [75, 15], [76, 14],
-	[77, 12], [78, 11], [79, 10], [80, 9], [81, 8],
-	[82, 7], [83, 6], [84, 4], [85, 3], [86, 2], [87, 1],
+	[72, 19], [73, 18], [74, 17], [75, 16], [76, 15],
+	[77, 13], [78, 12], [79, 11], [80, 10], [81, 9],
+	[82, 8], [83, 7], [84, 5], [85, 4], [86, 3], [87, 2], [88, 1],
 ]);
 const staffLines = new Set([76, 79, 83, 86]);
 const sharpNotes = new Set([1, 3, 6, 8, 10]);
@@ -49,6 +50,7 @@ const cellsByMidi = new Map();
 const halfGridShiftButtons = new Set(["L", "R", "A"]);
 let clipboardStatusTimer;
 let clipboardFadeTimer;
+let showAlternateButtons = false;
 const outputButtonRows = new Map([
 	["L", 5], ["R", 4], ["A", 3], ["Y", 2], ["X", 1],
 ]);
@@ -77,7 +79,12 @@ function findButtonsForNote(midi) {
 	if (candidates.length === 0) {
 		throw new Error(`No button mapping exists for MIDI note ${midi}`);
 	}
-	return candidates;
+	if (showAlternateButtons) {
+		return candidates;
+	}
+
+	const neutralCandidates = candidates.filter((candidate) => candidate.complexity === 0);
+	return neutralCandidates.length > 0 ? neutralCandidates : candidates;
 }
 
 function renderButtonStaff() {
@@ -220,6 +227,12 @@ notationToggle.addEventListener("click", (event) => {
 			cell.setAttribute("aria-label", `Column ${Number(cell.dataset.column) + 1}, ${name}, MIDI ${pitch.midi}`);
 		}
 	}
+});
+
+alternativesToggle.addEventListener("click", () => {
+	showAlternateButtons = !showAlternateButtons;
+	alternativesToggle.setAttribute("aria-pressed", String(showAlternateButtons));
+	renderButtonStaff();
 });
 
 for (let column = 1; column <= columnCount; column += 1) {
